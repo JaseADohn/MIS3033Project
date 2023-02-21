@@ -1,0 +1,17 @@
+﻿<Window x:Class="MIS3033Project.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MIS3033Project"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Button x:Name="BtnBrowse" Content="Browse" HorizontalAlignment="Left" Margin="525,32,0,0" VerticalAlignment="Top" Height="45" Width="137" Click="Button_Click"/>
+        <ComboBox x:Name="CboFileType" HorizontalAlignment="Left" Margin="239,83,0,0" VerticalAlignment="Top" Width="120"/>
+        <Button x:Name="BtnClear" Content="Clean Data" HorizontalAlignment="Left" Margin="525,99,0,0" VerticalAlignment="Top" Height="50" Width="137" Click="BtnClear_Click"/>
+        <TextBlock HorizontalAlignment="Left" Margin="187,86,0,0" TextWrapping="Wrap" Text="File Type: " VerticalAlignment="Top"/>
+        <TextBox x:Name="InputFileTextBox" HorizontalAlignment="Left" Margin="670,46,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+
+    </Grid>
+</Window>
