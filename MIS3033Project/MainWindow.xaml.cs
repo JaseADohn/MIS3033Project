@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,11 +14,13 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.IO;
-using Microsoft.Win32;
-using Newtonsoft;
-using System.Text.RegularExpressions;
-using Newtonsoft.Json;
+using System.Formats.Asn1;
+using System.Text.Json;
+using System.Globalization;
+using System.Security.Cryptography;
+using System.ComponentModel;
+//using Newtonsoft.Json;
+
 
 namespace MIS3033Project
 {
@@ -25,67 +29,138 @@ namespace MIS3033Project
     /// </summary>
     public partial class MainWindow : Window
     {
+        private List<Movie> movieListInput = new List<Movie>();
+        //private List<Director> directorInput = new List<Director>();
+
+
         public MainWindow()
         {
             InitializeComponent();
+
+            CboFileType.Items.Add("CSV");
+            CboFileType.Items.Add("JSON");
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void BtnImport_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
-            openFileDialog.Title = "Select a text file";
+            string path = Environment.GetEnvironmentVariable("USERPROFILE") + @"\Downloads";
 
-            if (openFileDialog.ShowDialog() == true)
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.InitialDirectory = path;
+            ofd.Filter = "Comma Separated Value Documents (.csv)|* .csv";
+
+            if (ofd.ShowDialog() == true)
             {
-                InputFileTextBox.Text = openFileDialog.FileName;
+                movieListInput = ReadMoviesFromCsv(ofd.FileName);
+
+                PopulateListBox(movieListInput);
             }
         }
 
-        private void BtnClear_Click(object sender, RoutedEventArgs e)
+        public static List<Movie> ReadMoviesFromCsv(string filePath)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Text files (*.txt)|*.txt|CSV files (*.csv)|*.csv|JSON files (*.json)|*.json";
-            if (openFileDialog.ShowDialog() == true)
+            var movies = new List<Movie>();
+            var lines = File.ReadAllLines(filePath);
+
+
+            for (int i = 1; i < lines.Length; i++) // skip header (1st row)
             {
-                string inputFilePath = openFileDialog.FileName;
+                var line = lines[i];
+                var movie = new Movie(line);
+                movies.Add(movie);
+            }
 
-                // Read the input file and clean the data
-                string inputData = File.ReadAllText(inputFilePath);
-                string inputExtension = System.IO.Path.GetExtension(inputFilePath);
+            return movies;
+        }
 
-                if (inputExtension == ".json")
+        private void PopulateListBox(List<Movie> movies)
+        {
+            foreach (var movie in movies)
+            {
+                lstAllInfo.Items.Add(movie);
+
+                foreach (Director director in movie.Directors)
                 {
-                    dynamic json = JsonConvert.DeserializeObject(inputData);
-                    inputData = JsonConvert.SerializeObject(json, Formatting.Indented);
-                }
-                else
-                {
-                    inputData = Regex.Replace(inputData, @"\t|\n|\r", " "); // replace tabs, newlines and carriage returns with spaces
-                    inputData = Regex.Replace(inputData, @"\s+", " "); // replace multiple spaces with a single space
-                    inputData = inputData.Trim(); // remove leading and trailing spaces
-                }
-
-                // Open a save file dialog to select the output file format and location
-                SaveFileDialog saveFileDialog = new SaveFileDialog();
-                saveFileDialog.Filter = "Text files (*.txt)|*.txt|CSV files (*.csv)|*.csv|JSON files (*.json)|*.json";
-                if (saveFileDialog.ShowDialog() == true)
-                {
-                    string outputFilePath = saveFileDialog.FileName;
-                    string outputExtension = System.IO.Path.GetExtension(outputFilePath);
-
-                    // Write the cleaned data to the output file
-                    if (outputExtension == ".json")
+                    if (!lstDirectors.Items.Contains(director.ToString()))
                     {
-                        dynamic json = JsonConvert.DeserializeObject(inputData);
-                        string outputData = JsonConvert.SerializeObject(json, Formatting.Indented);
-                        File.WriteAllText(outputFilePath, outputData);
-                    }
-                    else
-                    {
-                        File.WriteAllText(outputFilePath, inputData);
+                        lstDirectors.Items.Add(director.ToString());
                     }
                 }
+                foreach (string genre in movie.Genres)
+                {
+                    if (!lstGenres.Items.Contains(genre.ToString()))
+                    {
+                        lstGenres.Items.Add(genre.ToString());
+                    }
+                }
+            }
+            lstAllInfo.Items.SortDescriptions.Add(new SortDescription("Title", ListSortDirection.Ascending));
+
+            lstDirectors.Items.SortDescriptions.Add(new SortDescription("", ListSortDirection.Ascending));
+
+            lstGenres.Items.SortDescriptions.Add(new SortDescription("", ListSortDirection.Ascending));
+        }
+
+        private void BtnExport_Click(object sender, RoutedEventArgs e)
+        {
+            if (CboFileType.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a file format.");
+                return;
+            }
+
+            var selectedFormat = CboFileType.SelectedItem.ToString();
+
+            if (selectedFormat == "JSON")
+            {
+                string serializedData = "";
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                serializedData = JsonSerializer.Serialize(movieListInput, options);
+
+                string path = Environment.GetEnvironmentVariable("USERPROFILE") + @"\Downloads";
+                File.WriteAllText($"{path}\\MovieData_All.json", serializedData);
+                MessageBox.Show("Files saved");
+
+            }
+            else if (selectedFormat == "CSV")
+            {
+                StreamWriter csvOutput = new StreamWriter(@"C:\Users\jased\source\repos\MIS3033Project\MIS3033Project\AllData.csv");
+                csvOutput.WriteLine("Title, Genre, Director, Actor, IMDB");
+
+                foreach (var movie in lstAllInfo.Items)
+                {
+                    csvOutput.Write(movie + ", ");
+                    csvOutput.WriteLine();
+                }
+                csvOutput.Close();
+                MessageBox.Show("Files saved");
+
+                csvOutput = new StreamWriter(@"C:\Users\jased\source\repos\MIS3033Project\MIS3033Project\Directors.csv");
+                csvOutput.WriteLine("Title, Genre, Director, Actor, IMDB");
+
+                foreach (var director in lstDirectors.Items)
+                {
+                    csvOutput.Write(director);
+                    csvOutput.WriteLine();
+                }
+                csvOutput.Close();                
+
+                csvOutput = new StreamWriter(@"C:\Users\jased\source\repos\MIS3033Project\MIS3033Project\Genres.csv");
+                csvOutput.WriteLine("Title, Genre, Director, Actor, IMDB");
+
+                foreach (var genres in lstGenres.Items)
+                {
+                    csvOutput.Write(genres);
+                    csvOutput.WriteLine();
+                }
+                csvOutput.Close();
+                
+            }
+
+            else
+            {
+                MessageBox.Show($"Unknown file format: {selectedFormat}");
+                return;
             }
         }
     }

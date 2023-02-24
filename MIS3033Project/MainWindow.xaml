@@ -6,12 +6,14 @@
         xmlns:local="clr-namespace:MIS3033Project"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <Button x:Name="BtnBrowse" Content="Browse" HorizontalAlignment="Left" Margin="525,32,0,0" VerticalAlignment="Top" Height="45" Width="137" Click="Button_Click"/>
+    <Grid Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}">
+        <Button x:Name="BtnBrowse" Content="Browse" HorizontalAlignment="Left" Margin="525,32,0,0" VerticalAlignment="Top" Height="45" Width="137" Click="BtnImport_Click"/>
         <ComboBox x:Name="CboFileType" HorizontalAlignment="Left" Margin="239,83,0,0" VerticalAlignment="Top" Width="120"/>
-        <Button x:Name="BtnClear" Content="Clean Data" HorizontalAlignment="Left" Margin="525,99,0,0" VerticalAlignment="Top" Height="50" Width="137" Click="BtnClear_Click"/>
+        <Button x:Name="BtnExport" Content="Clean Data" HorizontalAlignment="Left" Margin="525,99,0,0" VerticalAlignment="Top" Height="50" Width="137" Click="BtnExport_Click"/>
         <TextBlock HorizontalAlignment="Left" Margin="187,86,0,0" TextWrapping="Wrap" Text="File Type: " VerticalAlignment="Top"/>
-        <TextBox x:Name="InputFileTextBox" HorizontalAlignment="Left" Margin="670,46,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <ListBox x:Name="lstDirectors" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="0,154,579,0" Background="#FFA97D7D"/>
+        <ListBox x:Name="lstAllInfo" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="226,154,254,0" Background="#FFA97D7D"/>
+        <ListBox x:Name="lstGenres" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="551,154,0,0" Background="#FFA97D7D"/>
 
     </Grid>
 </Window>
