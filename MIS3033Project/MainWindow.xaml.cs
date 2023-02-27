@@ -30,8 +30,7 @@ namespace MIS3033Project
     public partial class MainWindow : Window
     {
         private List<Movie> movieListInput = new List<Movie>();
-        //private List<Director> directorInput = new List<Director>();
-
+        string path = Environment.GetEnvironmentVariable("USERPROFILE") + @"\Downloads";
 
         public MainWindow()
         {
@@ -83,7 +82,8 @@ namespace MIS3033Project
                 {
                     if (!lstDirectors.Items.Contains(director.ToString()))
                     {
-                        lstDirectors.Items.Add(director.ToString());
+                        string name = director.ToString();
+                        lstDirectors.Items.Add(name);
                     }
                 }
                 foreach (string genre in movie.Genres)
@@ -113,18 +113,25 @@ namespace MIS3033Project
 
             if (selectedFormat == "JSON")
             {
-                string serializedData = "";
                 var options = new JsonSerializerOptions { WriteIndented = true };
-                serializedData = JsonSerializer.Serialize(movieListInput, options);
+                string serializedAllData = JsonSerializer.Serialize(movieListInput, options);
+                string DirectorsserializedData = JsonSerializer.Serialize(lstDirectors.Items, options);
+                string GenresserializedData = JsonSerializer.Serialize(lstGenres.Items, options);
 
-                string path = Environment.GetEnvironmentVariable("USERPROFILE") + @"\Downloads";
-                File.WriteAllText($"{path}\\MovieData_All.json", serializedData);
+
+                
+                File.WriteAllText($"{path}\\MovieData_All.json", serializedAllData);
+                File.WriteAllText($"{path}\\Directors.json", DirectorsserializedData);
+                File.WriteAllText($"{path}\\Genres.json", GenresserializedData);
                 MessageBox.Show("Files saved");
+
+
+
 
             }
             else if (selectedFormat == "CSV")
             {
-                StreamWriter csvOutput = new StreamWriter(@"C:\Users\jased\source\repos\MIS3033Project\MIS3033Project\AllData.csv");
+                StreamWriter csvOutput = new StreamWriter($@"{path}\AllData.csv");
                 csvOutput.WriteLine("Title, Genre, Director, Actor, IMDB");
 
                 foreach (var movie in lstAllInfo.Items)
@@ -135,8 +142,8 @@ namespace MIS3033Project
                 csvOutput.Close();
                 MessageBox.Show("Files saved");
 
-                csvOutput = new StreamWriter(@"C:\Users\jased\source\repos\MIS3033Project\MIS3033Project\Directors.csv");
-                csvOutput.WriteLine("Title, Genre, Director, Actor, IMDB");
+                csvOutput = new StreamWriter($@"{path}\Directors.csv");
+
 
                 foreach (var director in lstDirectors.Items)
                 {
@@ -145,8 +152,8 @@ namespace MIS3033Project
                 }
                 csvOutput.Close();                
 
-                csvOutput = new StreamWriter(@"C:\Users\jased\source\repos\MIS3033Project\MIS3033Project\Genres.csv");
-                csvOutput.WriteLine("Title, Genre, Director, Actor, IMDB");
+                csvOutput = new StreamWriter($@"{path}\Genres.csv");
+
 
                 foreach (var genres in lstGenres.Items)
                 {

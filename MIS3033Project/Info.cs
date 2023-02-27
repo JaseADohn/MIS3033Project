@@ -46,7 +46,7 @@ namespace MIS3033Project
 
         public override string ToString()
         {
-            return $"{Title}, {Genres}, {StarActors}, {Directors}, {ImdbLink}";
+            return $"{Title}, {string.Join("/", Genres)}, {string.Join(";", Directors)}, {string.Join(";", StarActors)}, {ImdbLink}";
         }
     }
 
